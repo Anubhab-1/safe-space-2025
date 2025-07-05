@@ -1,14 +1,48 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Phone, MessageCircle, Users } from "lucide-react";
+import { Phone, MessageCircle, Users, MapPin } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import heroImage from "@/assets/hero-image.jpg";
 
 const HeroSection = () => {
+  const { toast } = useToast();
+  
   const emergencyContacts = [
     { name: "Emergency Services", number: "911", icon: Phone },
     { name: "National Domestic Violence Hotline", number: "1-800-799-7233", icon: MessageCircle },
     { name: "Crisis Text Line", number: "Text HOME to 741741", icon: MessageCircle },
   ];
+
+  const shareLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          const locationMessage = `I'm sharing my location with you for safety: https://maps.google.com/maps?q=${latitude},${longitude}`;
+          
+          if (navigator.share) {
+            navigator.share({
+              title: 'My Current Location',
+              text: locationMessage,
+            });
+          } else {
+            navigator.clipboard.writeText(locationMessage);
+            toast({
+              title: "Location copied!",
+              description: "Location link copied to clipboard. Share it with your trusted contacts.",
+            });
+          }
+        },
+        () => {
+          toast({
+            title: "Location access denied",
+            description: "Please enable location access to share your location.",
+            variant: "destructive",
+          });
+        }
+      );
+    }
+  };
 
   return (
     <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
